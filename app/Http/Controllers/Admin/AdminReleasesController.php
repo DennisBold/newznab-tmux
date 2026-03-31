@@ -33,7 +33,7 @@ class AdminReleasesController extends BasePageController
 
         $meta_title = $title = 'Release List';
 
-        $page = $request->input('page', 1);
+        $page = (int) $request->input('page', 1);
         $releaseList = Release::getReleasesRange($page);
 
         return view('admin.releases.index', [
