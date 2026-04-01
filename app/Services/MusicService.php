@@ -55,7 +55,7 @@ class MusicService
         $this->asstag = Settings::settingValue('amazonassociatetag');
         $this->musicqty = Settings::settingValue('maxmusicprocessed') !== '' ? (int) Settings::settingValue('maxmusicprocessed') : 150;
         $this->sleeptime = Settings::settingValue('amazonsleep') !== '' ? (int) Settings::settingValue('amazonsleep') : 1000;
-        $this->imgSavePath = config('nntmux_settings.covers_path').'/music/';
+        $this->imgSavePath = config('nntmux_settings.covers_path').'music/';
         $this->renamed = (int) Settings::settingValue('lookupmusic') === 2 ? 'AND isrenamed = 1' : '';
 
         $this->failCache = [];
