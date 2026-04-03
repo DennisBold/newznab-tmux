@@ -119,81 +119,82 @@ Route::get('api/search/assist', [SearchSuggestController::class, 'searchAssist']
 Route::get('contact-us', [ContactUsController::class, 'showContactForm'])->name('contact-us');
 Route::post('contact-us', [ContactUsController::class, 'contact']);
 
-Route::middleware('isVerified')->group(function () {
-    Route::match(['GET', 'POST'], 'resetpassword', [ResetPasswordController::class, 'reset'])->name('resetpassword');
-    Route::match(['GET', 'POST'], 'profile', [ProfileController::class, 'show'])->name('profile');
+Route::middleware(['auth', '2fa'])->group(function () {
+    Route::middleware('isVerified')->group(function () {
+        Route::match(['GET', 'POST'], 'resetpassword', [ResetPasswordController::class, 'reset'])->name('resetpassword');
+        Route::match(['GET', 'POST'], 'profile', [ProfileController::class, 'show'])->name('profile');
 
-    Route::prefix('browse')->group(function () {
-        Route::match(['GET', 'POST'], 'tags', [BrowseController::class, 'tags'])->name('tags');
-        Route::match(['GET', 'POST'], 'group', [BrowseController::class, 'group'])->name('group');
-        Route::match(['GET', 'POST'], 'All', [BrowseController::class, 'index'])->name('All');
-        Route::match(['GET', 'POST'], '{parentCategory}/{id?}', [BrowseController::class, 'show'])->middleware('clearance')->name('browse');
+        Route::prefix('browse')->group(function () {
+            Route::match(['GET', 'POST'], 'tags', [BrowseController::class, 'tags'])->name('tags');
+            Route::match(['GET', 'POST'], 'group', [BrowseController::class, 'group'])->name('group');
+            Route::match(['GET', 'POST'], 'All', [BrowseController::class, 'index'])->name('All');
+            Route::match(['GET', 'POST'], '{parentCategory}/{id?}', [BrowseController::class, 'show'])->middleware('clearance')->name('browse');
+        });
+
+        Route::prefix('cart')->group(function () {
+            Route::match(['GET', 'POST'], 'index', [CartController::class, 'index'])->name('cart.index');
+            Route::match(['GET', 'POST'], 'add', [CartController::class, 'store'])->name('cart.add');
+            Route::match(['GET', 'POST'], 'delete/{id}', [CartController::class, 'destroy'])->name('cart.delete');
+        });
+
+        Route::match(['GET', 'POST'], 'details/{guid}', [DetailsController::class, 'show'])->name('details');
+        Route::match(['GET', 'POST'], 'getnzb/{guid}', [GetNzbController::class, 'getNzb'])->name('getnzb.guid');
+        Route::match(['GET', 'POST'], 'getnzb', [GetNzbController::class, 'getNzb'])->name('getnzb');
+        Route::match(['GET', 'POST'], 'rsshelp', [RssController::class, 'showRssDesc'])->name('rsshelp');
+        Route::match(['GET', 'POST'], 'apihelp', [ApiHelpController::class, 'index'])->name('apihelp');
+        Route::match(['GET', 'POST'], 'apiv2help', [ApiHelpController::class, 'apiv2'])->name('apiv2help');
+        Route::match(['GET', 'POST'], 'browsegroup', [BrowseGroupController::class, 'show'])->name('browsegroup');
+        Route::match(['GET', 'POST'], 'content', [ContentController::class, 'show'])->name('content');
+        Route::match(['GET', 'POST'], 'failed', [FailedReleasesController::class, 'failed'])->name('failed');
+
+        Route::middleware('clearance')->group(function () {
+            Route::match(['GET', 'POST'], 'Games', [GamesController::class, 'show'])->name('Games');
+            Route::match(['GET', 'POST'], 'trending-movies', [MovieController::class, 'showTrending'])->name('trending-movies');
+            Route::match(['GET', 'POST'], 'movie/{imdbid}', [MovieController::class, 'showMovie'])->name('movie.view');
+            Route::match(['GET', 'POST'], 'Movies/{id?}', [MovieController::class, 'showMovies'])->name('Movies');
+            Route::match(['GET', 'POST'], 'movie', [MovieController::class, 'showMovies'])->name('movie');
+            Route::match(['GET', 'POST'], 'movietrailers', [MovieController::class, 'showTrailer'])->name('movietrailers');
+            Route::post('movies/update-layout', [MovieController::class, 'updateLayout'])->name('movies.update-layout');
+            Route::match(['GET', 'POST'], 'Audio/{id?}', [MusicController::class, 'show'])->name('Audio');
+            Route::match(['GET', 'POST'], 'Console/{id?}', [ConsoleController::class, 'show'])->name('Console');
+            Route::match(['GET', 'POST'], 'XXX/{id?}', [AdultController::class, 'show'])->name('XXX');
+            Route::match(['GET', 'POST'], 'Books/{id?}', [BooksController::class, 'index'])->name('Books');
+            // TV-related routes
+            Route::match(['GET', 'POST'], 'series/{id?}', [SeriesController::class, 'index'])->name('series');
+            Route::match(['GET', 'POST'], 'trending-tv', [SeriesController::class, 'showTrending'])->name('trending-tv');
+            Route::match(['GET', 'POST'], 'myshows', [MyShowsController::class, 'show'])->name('myshows');
+            Route::match(['GET', 'POST'], 'myshows/browse', [MyShowsController::class, 'browse'])->name('myshows.browse');
+            // Movies-related routes
+            Route::match(['GET', 'POST'], 'mymovies', [MyMoviesController::class, 'show'])->name('mymovies');
+        });
+
+        Route::match(['GET', 'POST'], 'nfo/{id?}', [NfoController::class, 'showNfo'])->name('nfo');
+
+        Route::match(['GET', 'POST'], 'profileedit', [ProfileController::class, 'edit'])->name('profileedit');
+        Route::match(['GET', 'POST'], 'profile_delete', [ProfileController::class, 'destroy'])->name('profile_delete');
+        Route::post('profile/update-theme', [ProfileController::class, 'updateTheme'])->name('profile.update-theme');
+        Route::match(['GET', 'POST'], 'search', [SearchController::class, 'search'])->name('search');
+
+        // Release Report routes
+        Route::post('release-report', [ReleaseReportController::class, 'store'])->name('release-report.store');
+        Route::get('release-report/reasons', [ReleaseReportController::class, 'getReasons'])->name('release-report.reasons');
+        Route::get('release-report/check', [ReleaseReportController::class, 'checkReported'])->name('release-report.check');
+
+        Route::get('api/release/{guid}/filelist', [FileListApiController::class, 'getFileList'])->name('api.filelist');
+        Route::match(['GET', 'POST'], 'ajax_profile', [AjaxController::class, 'profile'])->name('ajax_profile');
+        Route::match(['GET', 'POST'], '2fa', [PasswordSecurityController::class, 'show2faForm'])->name('2fa');
+        Route::get('2fa/enable', [PasswordSecurityController::class, 'showEnable2faForm'])->name('2fa.enable');
+        Route::get('2fa/disable', [PasswordSecurityController::class, 'showDisable2faForm'])->name('2fa.disable');
+        Route::post('generate2faSecret', [PasswordSecurityController::class, 'generate2faSecret'])->name('generate2faSecret');
+        Route::post('2fa', [PasswordSecurityController::class, 'enable2fa'])->name('enable2fa');
+        Route::post('disable2fa', [PasswordSecurityController::class, 'disable2fa'])->name('disable2fa');
+        Route::post('profile-disable2fa', [PasswordSecurityController::class, 'profileDisable2fa'])->name('profile-disable2fa');
+        // Custom 2FA routes that redirect to profile page
+        Route::post('profileedit/enable2fa', [PasswordSecurityController::class, 'enable2fa'])->name('profileedit.enable2fa');
+        Route::post('profileedit/disable2fa', [PasswordSecurityController::class, 'disable2fa'])->name('profileedit.disable2fa');
+        Route::post('profileedit/cancel2fa', [PasswordSecurityController::class, 'cancelSetup'])->name('profileedit.cancel2fa');
+        Route::post('profile-security/disable-2fa', [ProfileSecurityController::class, 'disable2fa'])->name('profile.security.disable2fa');
     });
-
-    Route::prefix('cart')->group(function () {
-        Route::match(['GET', 'POST'], 'index', [CartController::class, 'index'])->name('cart.index');
-        Route::match(['GET', 'POST'], 'add', [CartController::class, 'store'])->name('cart.add');
-        Route::match(['GET', 'POST'], 'delete/{id}', [CartController::class, 'destroy'])->name('cart.delete');
-    });
-
-    Route::match(['GET', 'POST'], 'details/{guid}', [DetailsController::class, 'show'])->name('details');
-    Route::match(['GET', 'POST'], 'getnzb/{guid}', [GetNzbController::class, 'getNzb'])->name('getnzb.guid');
-    Route::match(['GET', 'POST'], 'getnzb', [GetNzbController::class, 'getNzb'])->name('getnzb');
-    Route::match(['GET', 'POST'], 'rsshelp', [RssController::class, 'showRssDesc'])->name('rsshelp');
-    Route::match(['GET', 'POST'], 'profile', [ProfileController::class, 'show'])->name('profile');
-    Route::match(['GET', 'POST'], 'apihelp', [ApiHelpController::class, 'index'])->name('apihelp');
-    Route::match(['GET', 'POST'], 'apiv2help', [ApiHelpController::class, 'apiv2'])->name('apiv2help');
-    Route::match(['GET', 'POST'], 'browsegroup', [BrowseGroupController::class, 'show'])->name('browsegroup');
-    Route::match(['GET', 'POST'], 'content', [ContentController::class, 'show'])->name('content');
-    Route::match(['GET', 'POST'], 'failed', [FailedReleasesController::class, 'failed'])->name('failed');
-
-    Route::middleware('clearance')->group(function () {
-        Route::match(['GET', 'POST'], 'Games', [GamesController::class, 'show'])->name('Games');
-        Route::match(['GET', 'POST'], 'trending-movies', [MovieController::class, 'showTrending'])->name('trending-movies');
-        Route::match(['GET', 'POST'], 'movie/{imdbid}', [MovieController::class, 'showMovie'])->name('movie.view');
-        Route::match(['GET', 'POST'], 'Movies/{id?}', [MovieController::class, 'showMovies'])->name('Movies');
-        Route::match(['GET', 'POST'], 'movie', [MovieController::class, 'showMovies'])->name('movie');
-        Route::match(['GET', 'POST'], 'movietrailers', [MovieController::class, 'showTrailer'])->name('movietrailers');
-        Route::post('movies/update-layout', [MovieController::class, 'updateLayout'])->name('movies.update-layout');
-        Route::match(['GET', 'POST'], 'Audio/{id?}', [MusicController::class, 'show'])->name('Audio');
-        Route::match(['GET', 'POST'], 'Console/{id?}', [ConsoleController::class, 'show'])->name('Console');
-        Route::match(['GET', 'POST'], 'XXX/{id?}', [AdultController::class, 'show'])->name('XXX');
-        Route::match(['GET', 'POST'], 'Books/{id?}', [BooksController::class, 'index'])->name('Books');
-        // TV-related routes
-        Route::match(['GET', 'POST'], 'series/{id?}', [SeriesController::class, 'index'])->name('series');
-        Route::match(['GET', 'POST'], 'trending-tv', [SeriesController::class, 'showTrending'])->name('trending-tv');
-        Route::match(['GET', 'POST'], 'myshows', [MyShowsController::class, 'show'])->name('myshows');
-        Route::match(['GET', 'POST'], 'myshows/browse', [MyShowsController::class, 'browse'])->name('myshows.browse');
-        // Movies-related routes
-        Route::match(['GET', 'POST'], 'mymovies', [MyMoviesController::class, 'show'])->name('mymovies');
-    });
-
-    Route::match(['GET', 'POST'], 'nfo/{id?}', [NfoController::class, 'showNfo'])->name('nfo');
-
-    Route::match(['GET', 'POST'], 'profileedit', [ProfileController::class, 'edit'])->name('profileedit');
-    Route::match(['GET', 'POST'], 'profile_delete', [ProfileController::class, 'destroy'])->name('profile_delete');
-    Route::post('profile/update-theme', [ProfileController::class, 'updateTheme'])->name('profile.update-theme');
-    Route::match(['GET', 'POST'], 'search', [SearchController::class, 'search'])->name('search');
-
-    // Release Report routes
-    Route::post('release-report', [ReleaseReportController::class, 'store'])->name('release-report.store');
-    Route::get('release-report/reasons', [ReleaseReportController::class, 'getReasons'])->name('release-report.reasons');
-    Route::get('release-report/check', [ReleaseReportController::class, 'checkReported'])->name('release-report.check');
-
-    Route::get('api/release/{guid}/filelist', [FileListApiController::class, 'getFileList'])->name('api.filelist');
-    Route::match(['GET', 'POST'], 'ajax_profile', [AjaxController::class, 'profile'])->name('ajax_profile');
-    Route::match(['GET', 'POST'], '2fa', [PasswordSecurityController::class, 'show2faForm'])->name('2fa');
-    Route::get('2fa/enable', [PasswordSecurityController::class, 'showEnable2faForm'])->name('2fa.enable');
-    Route::get('2fa/disable', [PasswordSecurityController::class, 'showDisable2faForm'])->name('2fa.disable');
-    Route::post('generate2faSecret', [PasswordSecurityController::class, 'generate2faSecret'])->name('generate2faSecret');
-    Route::post('2fa', [PasswordSecurityController::class, 'enable2fa'])->name('enable2fa');
-    Route::post('disable2fa', [PasswordSecurityController::class, 'disable2fa'])->name('disable2fa');
-    Route::post('profile-disable2fa', [PasswordSecurityController::class, 'profileDisable2fa'])->name('profile-disable2fa');
-    // Custom 2FA routes that redirect to profile page
-    Route::post('profileedit/enable2fa', [PasswordSecurityController::class, 'enable2fa'])->name('profileedit.enable2fa');
-    Route::post('profileedit/disable2fa', [PasswordSecurityController::class, 'disable2fa'])->name('profileedit.disable2fa');
-    Route::post('profileedit/cancel2fa', [PasswordSecurityController::class, 'cancelSetup'])->name('profileedit.cancel2fa');
-    Route::post('profile-security/disable-2fa', [ProfileSecurityController::class, 'disable2fa'])->name('profile.security.disable2fa');
 });
 
 Route::middleware(['role:Admin', '2fa'])->prefix('admin')->group(function () {
@@ -314,7 +315,7 @@ Route::get('btcpay', function () {
     return redirect()->to('https://simplegate.space/apps/3MjgKvosMZtc2sSxiRBwadDCn1zA/pos');
 })->name('btcpay');
 // Invitation management routes
-Route::prefix('invitations')->name('invitations.')->group(function () {
+Route::middleware(['auth', '2fa'])->prefix('invitations')->name('invitations.')->group(function () {
     Route::get('/', [InvitationController::class, 'index'])->name('index');
     Route::get('/create', [InvitationController::class, 'create'])->name('create');
     Route::post('/store', [InvitationController::class, 'store'])->name('store');

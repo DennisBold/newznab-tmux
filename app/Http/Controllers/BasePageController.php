@@ -9,7 +9,6 @@ use App\Models\Settings;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
@@ -56,8 +55,6 @@ class BasePageController extends Controller
      */
     public function __construct()
     {
-        $this->middleware(['auth', 'web', '2fa'])->except('api', 'contact', 'showContactForm', 'callback', 'btcPayCallback', 'getNzb', 'terms', 'privacyPolicy', 'capabilities', 'movie', 'apiSearch', 'tv', 'details', 'failed', 'showRssDesc', 'fullFeedRss', 'categoryFeedRss', 'cartRss', 'myMoviesRss', 'myShowsRss', 'trendingMoviesRss', 'trendingShowsRss', 'release', 'reset', 'showLinkRequestForm');
-
         // Load settings as collection with caching (5 minutes)
         $this->settings = Cache::remember('site_settings', 300, function () {
             return Settings::query()->pluck('value', 'name');
@@ -73,22 +70,6 @@ class BasePageController extends Controller
             return $this->settings->map(function ($value) {
                 return Settings::convertValue($value);
             })->all();
-        });
-
-        // Initialize userdata property for controllers that need it
-        $this->middleware(function ($request, $next) {
-            if (Auth::check()) {
-                $userId = Auth::id();
-                $this->userdata = User::find($userId);
-                // Cache category exclusions per user (5 minutes)
-                $this->userdata->categoryexclusions = Cache::remember(
-                    'user_category_exclusions_'.$userId,
-                    300,
-                    fn () => User::getCategoryExclusionById($userId)
-                );
-            }
-
-            return $next($request);
         });
     }
 

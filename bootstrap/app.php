@@ -7,6 +7,7 @@ use App\Http\Middleware\EnsureAuthenticatedUsersAreVerified;
 use App\Http\Middleware\ForceJsonOnAPI;
 use App\Http\Middleware\Google2FAMiddleware;
 use App\Http\Middleware\NoCacheForAuthenticatedUsers;
+use App\Http\Middleware\SetUserData;
 use App\Http\Middleware\SetUserTimezone;
 use App\Http\Middleware\ThrottleApiRequestsByToken;
 use App\Http\Middleware\TrustedDevice2FAMiddleware;
@@ -73,6 +74,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web([
             AuthenticateSession::class,
+            SetUserData::class, // Initialize userdata for controllers
             TrustedDevice2FAMiddleware::class, // Add our new trusted device middleware
             ContentSecurityPolicy::class, // Add CSP middleware for security
             SetUserTimezone::class, // Set user timezone
