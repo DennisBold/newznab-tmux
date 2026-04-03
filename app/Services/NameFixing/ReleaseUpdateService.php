@@ -354,7 +354,7 @@ class ReleaseUpdateService
                 foreach ($hit as $val) {
                     $title = Predb::query()->where('title', trim($val))->select(['title', 'id'])->first();
                     if ($title !== null) {
-                        return ['title' => $title['title'], 'id' => $title['id']];
+                        return ['title' => $title->title, 'id' => $title->id];
                     }
                 }
             }

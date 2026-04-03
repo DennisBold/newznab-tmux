@@ -1290,13 +1290,12 @@ class NameFixingService
                 if (! empty($results)) {
                     foreach ($results as $result) {
                         if (! empty($result)) {
-                            $resultData = is_array($result) ? $result : (array) $result;
-                            $preFtMatch = $this->preMatch($resultData['filename'] ?? '');
+                            $preFtMatch = $this->preMatch($result->filename ?? '');
                             if ($preFtMatch[0] === true) {
-                                if ($resultData['title'] !== $release->searchname) {
-                                    $this->updateService->updateRelease($release, $resultData['title'], 'file matched source: '.($resultData['source'] ?? ''), $echo, 'PreDB file match, ', $nameStatus, $show);
+                                if ($result->title !== $release->searchname) {
+                                    $this->updateService->updateRelease($release, $result->title, 'file matched source: '.($result->source ?? ''), $echo, 'PreDB file match, ', $nameStatus, $show);
                                 } else {
-                                    $this->updateService->updateSingleColumn('predb_id', $resultData['id'] ?? 0, $release->releases_id);
+                                    $this->updateService->updateSingleColumn('predb_id', $result->id ?? 0, $release->releases_id);
                                 }
                                 $matching++;
 

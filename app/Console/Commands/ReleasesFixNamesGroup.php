@@ -187,10 +187,10 @@ class ReleasesFixNamesGroup extends Command
                 $this->nameFixingService->reset();
                 $fileNames = explode('|', $release->filestring);
 
-                $releaseFile = $release;
+                $releaseFile = clone $release;
                 foreach ($fileNames as $fileName) {
                     if (! $this->nameFixingService->getUpdateService()->matched) {
-                        $releaseFile->textstring = $fileName;
+                        $releaseFile->textstring = (string) $fileName;
                         $this->nameFixingService->checkName($releaseFile, true, 'Filenames, ', true, true);
                     }
                 }
@@ -296,10 +296,10 @@ class ReleasesFixNamesGroup extends Command
             } elseif ($ftmatched < 0) {
                 $searched = -6;
             } else {
-                $searched = $pre['searched'] - 1;
+                $searched = $pre->searched - 1;
             }
 
-            Predb::query()->where('id', $pre['predb_id'])->update(['searched' => $searched]);
+            Predb::query()->where('id', $pre->predb_id)->update(['searched' => $searched]);
             $this->checked++;
 
             $bar->advance();
