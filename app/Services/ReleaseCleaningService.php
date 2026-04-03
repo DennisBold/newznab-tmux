@@ -419,6 +419,12 @@ class ReleaseCleaningService
     {
         $cleanerName = preg_replace('/(\- )?yEnc$/', '', $subject);
 
+        // Strip "[N/N] - " (where N is any number)
+        $cleanerName = preg_replace('/^\[\d+\/\d+\]\s*-\s*/', '', $cleanerName);
+
+        // Strip quotation marks
+        $cleanerName = str_replace(['"', '#34;'], '', $cleanerName);
+
         return trim(preg_replace('/\s\s+/', ' ', $cleanerName));
     }
 
@@ -430,6 +436,12 @@ class ReleaseCleaningService
     public function fixerCleaner(string $name)
     {
         $cleanerName = $name;
+
+        // Strip "[N/N] - " (where N is any number) from the start
+        $cleanerName = preg_replace('/^\[\d+\/\d+\]\s*-\s*/', '', $cleanerName);
+
+        // Strip quotation marks
+        $cleanerName = str_replace(['"', '#34;'], '', $cleanerName);
 
         // Remove sample/proof/thumbs markers from the end
         $cleanerName = preg_replace('/[.\-_](sample|proof|thumbs?)$/i', '', $cleanerName);
