@@ -55,9 +55,11 @@ class PostProcessRunner extends BaseRunner
             try {
                 $results = Concurrency::run($tasks);
 
-                foreach ($results as $taskIdx => $output) {
-                    echo $output;
-                    cli()->primary('Finished task for '.$desc);
+                if (! empty($results)) {
+                    foreach ($results as $taskIdx => $output) {
+                        echo $output;
+                        cli()->primary('Finished task for '.$desc);
+                    }
                 }
             } catch (\Throwable $e) {
                 Log::error('Postprocess batch failed: '.$e->getMessage());
@@ -247,9 +249,11 @@ class PostProcessRunner extends BaseRunner
             try {
                 $results = Concurrency::run($tasks);
 
-                foreach ($results as $taskIdx => $output) {
-                    echo $output;
-                    cli()->primary('Finished task for '.$desc);
+                if (! empty($results)) {
+                    foreach ($results as $taskIdx => $output) {
+                        echo $output;
+                        cli()->primary('Finished task for '.$desc);
+                    }
                 }
             } catch (\Throwable $e) {
                 Log::error('TV pipeline batch failed: '.$e->getMessage());

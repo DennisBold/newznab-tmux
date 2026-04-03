@@ -113,10 +113,12 @@ class ReleasesRunner extends BaseRunner
             try {
                 $results = Concurrency::run($tasks);
 
-                foreach ($results as $groupId => $output) {
-                    echo $output;
-                    $name = UsenetGroup::getNameByID($groupId);
-                    cli()->primary('Finished updating binaries, processing releases and additional postprocessing for group: '.$name);
+                if (! empty($results)) {
+                    foreach ($results as $groupId => $output) {
+                        echo $output;
+                        $name = UsenetGroup::getNameByID($groupId);
+                        cli()->primary('Finished updating binaries, processing releases and additional postprocessing for group: '.$name);
+                    }
                 }
             } catch (\Throwable $e) {
                 Log::error('Update per group batch failed: '.$e->getMessage());
@@ -135,7 +137,7 @@ class ReleasesRunner extends BaseRunner
             $preCount = DB::select(
                 "SELECT COUNT(p.id) AS num FROM predb p WHERE LENGTH(p.title) >= 15 AND p.title NOT REGEXP '[\"\<\> ]' AND p.searched = 0 AND p.predate < (NOW() - INTERVAL 1 DAY)"
             );
-            if (! empty($preCount) && (int) $preCount[0]->num > 0 && $maxPerRun > 0) {
+            if (! empty($preCount) && isset($preCount[0]->num) && (int) $preCount[0]->num > 0 && $maxPerRun > 0) {
                 $leftGuids = \array_slice($leftGuids, 0, (int) ceil($preCount[0]->num / $maxPerRun));
             } else {
                 $leftGuids = [];
@@ -186,9 +188,11 @@ class ReleasesRunner extends BaseRunner
             try {
                 $results = Concurrency::run($tasks);
 
-                foreach ($results as $taskIdx => $output) {
-                    echo $output;
-                    cli()->primary('Task #'.$taskIdx.' Finished fixing releases names');
+                if (! empty($results)) {
+                    foreach ($results as $taskIdx => $output) {
+                        echo $output;
+                        cli()->primary('Task #'.$taskIdx.' Finished fixing releases names');
+                    }
                 }
             } catch (\Throwable $e) {
                 Log::error('Fix rel names batch failed: '.$e->getMessage());
